@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grievance Redressal Portal</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <style>
+        /* Custom styles to enhance the look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* A light grey background */
+        }
+        .form-container, .tracker-container {
+            transition: all 0.3s ease-in-out;
+        }
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-in-review { background-color: #dbeafe; color: #1e40af; }
+        .status-on-hold { background-color: #fed7aa; color: #9a3412; }
+        .status-resolved { background-color: #d1fae5; color: #065f46; }
+        .status-dismissed { background-color: #fecaca; color: #991b1b; }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold text-gray-900">Grievance Redressal Portal</h1>
+            <p class="mt-1 text-sm text-gray-600">A transparent and efficient system to address your concerns.</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Grievance Submission Form -->
+        <div id="form-section" class="form-container bg-white p-8 rounded-xl shadow-lg mb-12">
+            <h2 class="text-2xl font-bold mb-6">Submit a New Grievance</h2>
+            
+            <!-- Grievance ID Display Area -->
+            <div id="grievanceIdDisplay" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md mb-6" role="alert">
+                <p class="font-bold">Grievance Submitted Successfully!</p>
+                <p>Your Grievance ID is: <strong id="newGrievanceId" class="text-lg"></strong></p>
+                <button id="copyIdButton" class="mt-2 px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    Copy ID
+                </button>
+            </div>
+
+            <form id="grievanceForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Mobile Number -->
+                    <div>
+                        <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                        <input type="tel" id="mobile" name="mobile" required pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- College Roll Number -->
+                    <div>
+                        <label for="rollNumber" class="block text-sm font-medium text-gray-700">College Roll Number</label>
+                        <input type="text" id="rollNumber" name="rollNumber" required pattern="[0-9]{7}" title="Please enter a 7-digit roll number" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Course -->
+                    <div>
+                        <label for="course" class="block text-sm font-medium text-gray-700">Course</label>
+                        <select id="course" name="course" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">Select your course</option>
+                            <option>B.A. (Hons.) Applied Psychology</option>
+                            <option>B.A. (Hons.) Arabic</option>
+                            <option>B.A. (Hons.) Bengali</option>
+                            <option>B.A. (Hons.) Economics</option>
+                            <option>B.A. (Hons.) English</option>
+                            <option>B.A. (Hons.) French</option>
+                            <option>B.A. (Hons.) Geography</option>
+                            <option>B.A. (Hons.) German</option>
+                            <option>B.A. (Hons.) Hindi</option>
+                            <option>B.A. (Hons.) History</option>
+                            <option>B.A. (Hons.) Italian</option>
+                            <option>B.A. (Hons.) Journalism</option>
+                            <option>B.A. (Hons.) Persian</option>
+                            <option>B.A. (Hons.) Philosophy</option>
+                            <option>B.A. (Hons.) Political Science</option>
+                            <option>B.A. (Hons.) Psychology</option>
+                            <option>B.A. (Hons.) Punjabi</option>
+                            <option>B.A. (Hons.) Sanskrit</option>
+                            <option>B.A. (Hons.) Social Work</option>
+                            <option>B.A. (Hons.) Sociology</option>
+                            <option>B.A. (Hons.) Spanish</option>
+                            <option>B.A. (Hons.) Urdu</option>
+                            <option>B.Com. (Hons.)</option>
+                            <option>B.Com.</option>
+                            <option>B.Sc. (Hons.) Anthropology</option>
+                            <option>B.Sc. (Hons.) Biochemistry</option>
+                            <option>B.Sc. (Hons.) Biomedical Science</option>
+                            <option>B.Sc. (Hons.) Botany</option>
+                            <option>B.Sc. (Hons.) Chemistry</option>
+                            <option>B.Sc. (Hons.) Computer Science</option>
+                            <option>B.Sc. (Hons.) Electronics</option>
+                            <option>B.Sc. (Hons.) Geology</option>
+                            <option>B.Sc. (Hons.) Instrumentation</option>
+                            <option>B.Sc. (Hons.) Mathematics</option>
+                            <option>B.Sc. (Hons.) Microbiology</option>
+                            <option>B.Sc. (Hons.) Physics</option>
+                            <option>B.Sc. (Hons.) Statistics</option>
+                            <option>B.Sc. (Hons.) Zoology</option>
+                            <option>B.Sc. in Physical Education, Health Education & Sports</option>
+                            <option>B.Sc. Life Sciences</option>
+                            <option>B.Sc. Physical Sciences</option>
+                            <!-- Add other courses as needed -->
+                        </select>
+                    </div>
+
+                    <!-- Year -->
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700">Year</label>
+                        <select id="year" name="year" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">Select Year</option>
+                            <option>I</option>
+                            <option>II</option>
+                            <option>III</option>
+                            <option>IV</option>
+                        </select>
+                    </div>
+
+                    <!-- First Grievance -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Is this your first grievance?</label>
+                        <div class="mt-2 flex items-center space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="firstGrievance" value="Yes" required class="text-indigo-600 focus:ring-indigo-500">
+                                <span class="ml-2">Yes</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="firstGrievance" value="No" class="text-indigo-600 focus:ring-indigo-500">
+                                <span class="ml-2">No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Type of Grievance -->
+                    <div class="md:col-span-2">
+                        <label for="grievanceType" class="block text-sm font-medium text-gray-700">Type of Grievance</label>
+                        <select id="grievanceType" name="grievanceType" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">Select a category</option>
+                            <option>Admin</option>
+                            <option>Canteen</option>
+                            <option>Infrastructure</option>
+                            <option>Academics</option>
+                            <option>Personal</option>
+                            <option>Hostel</option>
+                            <option>Others</option>
+                        </select>
+                    </div>
+
+                    <!-- Grievance Description -->
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Grievance Description</label>
+                        <textarea id="description" name="description" rows="4" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                    </div>
+
+                    <!-- reCAPTCHA -->
+                    <div class="md:col-span-2">
+                        <!-- IMPORTANT: Replace with your site key -->
+                        <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+                    </div>
+                    
+                    <!-- Confirmation Checkbox -->
+                    <div class="md:col-span-2 flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="confirmation" name="confirmation" type="checkbox" required class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="confirmation" class="font-medium text-gray-700">I confirm all the information given by me is correct.</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button & Loader -->
+                <div class="mt-8 text-right">
+                    <button type="submit" id="submitButton" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span id="submitButtonText">Submit Grievance</span>
+                        <div id="submitLoader" class="hidden loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 ml-3"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grievance Status Tracker -->
+        <div id="tracker-section" class="tracker-container bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-6">Track Your Grievance</h2>
+            <form id="trackerForm" class="flex flex-col sm:flex-row items-center gap-4">
+                <label for="grievanceIdInput" class="sr-only">Grievance ID</label>
+                <input type="text" id="grievanceIdInput" placeholder="Enter your Grievance ID (e.g., GRV-XXXXX)" required class="flex-grow w-full px-4 py-3 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <button type="submit" id="trackButton" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700">
+                    <span id="trackButtonText">Track Status</span>
+                    <div id="trackLoader" class="hidden loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 ml-3"></div>
+                </button>
+            </form>
+            
+            <!-- Tracker Results Display -->
+            <div id="trackerResults" class="mt-8 hidden">
+                <!-- Results will be injected here by JavaScript -->
+            </div>
+        </div>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white mt-12">
+        <div class="max-w-6xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            <p>&copy; 2024 Grievance Redressal Portal. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!--
+    ================================================================
+    IMPORTANT: SETUP INSTRUCTIONS
+    ================================================================
+
+    To make this portal functional, you need to connect it to a Google Sheet.
+    Follow these steps carefully:
+
+    ----------------------------------------------------------------
+    STEP 1: CREATE A GOOGLE SHEET
+    ----------------------------------------------------------------
+    1. Go to sheets.google.com and create a new blank sheet.
+    2. Rename the sheet to "Grievance Portal".
+    3. In the first row, create the following headers exactly as written:
+       Grievance ID | Submission Timestamp | Name | Email | Mobile | Roll Number | Course | Year | First Grievance | Grievance Type | Description | Status | Response from the Admin
+
+    4. The "Status" column will be "Pending" by default. You can change it to:
+       In Review | On Hold | Dismissed | Resolved
+    5. The "Response from the Admin" column is where you will type your reply.
+
+    ----------------------------------------------------------------
+    STEP 2: CREATE A GOOGLE APPS SCRIPT
+    ----------------------------------------------------------------
+    1. In your Google Sheet, go to "Extensions" > "Apps Script".
+    2. A new script editor will open. Delete any existing code (like `function myFunction() {}`).
+    3. Copy the entire JavaScript code block below and paste it into the script editor.
+    4. Save the project (give it a name like "GrievanceAPI").
+
+    // PASTE THIS CODE INTO GOOGLE APPS SCRIPT
+    /*
+    const sheetName = "Sheet1"; // Or whatever your sheet is named
+    const scriptProp = PropertiesService.getScriptProperties();
+
+    function doPost(e) {
+      const lock = LockService.getScriptLock();
+      lock.tryLock(10000);
+
+      try {
+        const doc = SpreadsheetApp.openById(scriptProp.getProperty("key"));
+        const sheet = doc.getSheetByName(sheetName);
+
+        const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        const nextRow = sheet.getLastRow() + 1;
+
+        const newRow = headers.map(function(header) {
+          if (header === "Submission Timestamp") {
+            return new Date();
+          } else if (header === "Status") {
+            return "Pending"; // Default status
+          } else {
+            return e.parameter[header] || "";
+          }
+        });
+
+        sheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
+
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "success", "row": nextRow }))
+          .setMimeType(ContentService.MimeType.JSON);
+
+      } catch (e) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "error", "error": e }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } finally {
+        lock.releaseLock();
+      }
+    }
+
+    function doGet(e) {
+      const lock = LockService.getScriptLock();
+      lock.tryLock(10000);
+
+      try {
+        const doc = SpreadsheetApp.openById(scriptProp.getProperty("key"));
+        const sheet = doc.getSheetByName(sheetName);
+        const data = sheet.getDataRange().getValues();
+        const headers = data.shift();
+        
+        const grievanceId = e.parameter.id;
+        
+        if (!grievanceId) {
+          return ContentService
+            .createTextOutput(JSON.stringify({ "result": "error", "message": "No ID provided." }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+
+        const idColumnIndex = headers.indexOf("Grievance ID");
+        if (idColumnIndex === -1) {
+            return ContentService.createTextOutput(JSON.stringify({"result": "error", "message": "Grievance ID column not found"})).setMimeType(ContentService.MimeType.JSON);
+        }
+
+        const rowData = data.find(row => row[idColumnIndex] === grievanceId);
+
+        if (rowData) {
+          const result = {};
+          headers.forEach((header, index) => {
+            result[header] = rowData[index];
+          });
+
+          return ContentService
+            .createTextOutput(JSON.stringify({ "result": "success", "data": result }))
+            .setMimeType(ContentService.MimeType.JSON);
+        } else {
+          return ContentService
+            .createTextOutput(JSON.stringify({ "result": "error", "message": "Grievance ID not found." }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+
+      } catch (e) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ "result": "error", "error": e }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } finally {
+        lock.releaseLock();
+      }
+    }
+
+    function setup() {
+      const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+      scriptProp.setProperty("key", activeSpreadsheet.getId());
+    }
+    */
+
+    5. From the function dropdown in the toolbar, select "setup" and click "Run".
+    6. You will be asked to authorize the script. Click "Review permissions", select your Google account, click "Advanced", then "Go to (unsafe)", and finally "Allow". This is safe as you are authorizing your own script.
+
+    ----------------------------------------------------------------
+    STEP 3: DEPLOY THE SCRIPT AS A WEB APP
+    ----------------------------------------------------------------
+    1. Click the "Deploy" button (top right) > "New deployment".
+    2. Click the gear icon next to "Select type" and choose "Web app".
+    3. In the "Description" field, type "Grievance Portal API".
+    4. For "Execute as", select "Me".
+    5. For "Who has access", select "Anyone". **This is crucial.**
+    6. Click "Deploy".
+    7. After deployment, a "Web app URL" will be shown. Click the "Copy" button.
+    8. **Paste this URL into the `scriptURL` variable in the JavaScript code below (line 700).**
+
+    ----------------------------------------------------------------
+    STEP 4: GET RECAPTCHA KEYS
+    ----------------------------------------------------------------
+    1. Go to google.com/recaptcha/admin/create
+    2. Label: Your website name (e.g., Grievance Portal)
+    3. reCAPTCHA type: Select "reCAPTCHA v2" -> "I'm not a robot" Checkbox.
+    4. Domains: Since this is a local file, you can't add a domain. You might need to test this on a live server or temporarily disable it for local testing. For now, you will get a "localhost is not in the list of supported domains" error. When you host it, add your domain here.
+    5. Accept the terms and submit.
+    6. You will get a "SITE KEY" and a "SECRET KEY".
+    7. **Paste the "SITE KEY" into the HTML above (line 213).** You don't need the secret key for this client-side implementation.
+
+    -->
+    <script>
+        // =================================================================
+        // MAIN JAVASCRIPT LOGIC
+        // =================================================================
+
+        // IMPORTANT: Paste your Google Apps Script Web App URL here
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyKGwt4-4CnL469rVpcL2mJkwbm6betslBeNRpLOzpErCda-sLkTGww-1OZHERIpRCltw/exec';
+        
+        const form = document.getElementById('grievanceForm');
+        const submitButton = document.getElementById('submitButton');
+        const submitButtonText = document.getElementById('submitButtonText');
+        const submitLoader = document.getElementById('submitLoader');
+        const grievanceIdDisplay = document.getElementById('grievanceIdDisplay');
+        const newGrievanceId = document.getElementById('newGrievanceId');
+        const copyIdButton = document.getElementById('copyIdButton');
+
+        // --- Grievance Submission Logic ---
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // Validate reCAPTCHA
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (recaptchaResponse.length === 0) {
+                alert('Please complete the reCAPTCHA.');
+                return;
+            }
+
+            // Show loader and disable button
+            submitButton.disabled = true;
+            submitButtonText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+
+            // Generate Grievance ID
+            const grievanceId = 'GRV-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+            const formData = new FormData(form);
+            formData.append('Grievance ID', grievanceId);
+            // The timestamp is added by the Google Script
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === 'success') {
+                        // Display success message and Grievance ID
+                        newGrievanceId.textContent = grievanceId;
+                        grievanceIdDisplay.classList.remove('hidden');
+                        window.scrollTo(0, 0); // Scroll to top to see the message
+                        form.reset(); // Reset the form
+                        grecaptcha.reset(); // Reset reCAPTCHA
+                    } else {
+                        throw new Error(data.error || 'An unknown error occurred.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    alert('An error occurred while submitting your grievance. Please try again.');
+                })
+                .finally(() => {
+                    // Hide loader and re-enable button
+                    submitButton.disabled = false;
+                    submitButtonText.classList.remove('hidden');
+                    submitLoader.classList.add('hidden');
+                });
+        });
+
+        // --- Copy Grievance ID Logic ---
+        copyIdButton.addEventListener('click', () => {
+            const idToCopy = newGrievanceId.textContent;
+            navigator.clipboard.writeText(idToCopy).then(() => {
+                copyIdButton.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyIdButton.textContent = 'Copy ID';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy ID. Please copy it manually.');
+            });
+        });
+        
+        // --- Grievance Tracker Logic ---
+        const trackerForm = document.getElementById('trackerForm');
+        const trackButton = document.getElementById('trackButton');
+        const trackButtonText = document.getElementById('trackButtonText');
+        const trackLoader = document.getElementById('trackLoader');
+        const trackerResults = document.getElementById('trackerResults');
+        const grievanceIdInput = document.getElementById('grievanceIdInput');
+
+        trackerForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const grievanceId = grievanceIdInput.value.trim();
+            if (!grievanceId) {
+                alert('Please enter a Grievance ID.');
+                return;
+            }
+
+            // Show loader and disable button
+            trackButton.disabled = true;
+            trackButtonText.classList.add('hidden');
+            trackLoader.classList.remove('hidden');
+            trackerResults.classList.add('hidden');
+            trackerResults.innerHTML = ''; // Clear previous results
+
+            const url = new URL(scriptURL);
+            url.searchParams.append('id', grievanceId);
+
+            fetch(url, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === 'success') {
+                        displayTrackerResults(data.data);
+                    } else {
+                        displayTrackerError(data.message || 'Grievance ID not found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    displayTrackerError('An error occurred while fetching the status.');
+                })
+                .finally(() => {
+                    // Hide loader and re-enable button
+                    trackButton.disabled = false;
+                    trackButtonText.classList.remove('hidden');
+                    trackLoader.classList.add('hidden');
+                });
+        });
+
+        function getStatusClass(status) {
+            status = status.toLowerCase();
+            if (status.includes('resolved')) return 'status-resolved';
+            if (status.includes('dismissed')) return 'status-dismissed';
+            if (status.includes('in review')) return 'status-in-review';
+            if (status.includes('on hold')) return 'status-on-hold';
+            return 'status-pending'; // Default for 'Pending'
+        }
+
+        function displayTrackerResults(data) {
+            const submissionDate = new Date(data['Submission Timestamp']).toLocaleString();
+            const statusClass = getStatusClass(data['Status'] || 'Pending');
+
+            const resultsHTML = `
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">Grievance Details</h3>
+                        <span class="mt-2 md:mt-0 status-badge ${statusClass}">${data['Status'] || 'Pending'}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                        <div>
+                            <p class="font-semibold text-gray-600">Grievance ID:</p>
+                            <p class="text-gray-800">${data['Grievance ID']}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-600">Submission Date:</p>
+                            <p class="text-gray-800">${submissionDate}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="font-semibold text-gray-600">Your Grievance:</p>
+                            <p class="text-gray-800 bg-gray-50 p-3 rounded-md border">${data['Description'] || 'N/A'}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="font-semibold text-gray-600">Response from Admin:</p>
+                            <div class="text-gray-800 bg-blue-50 p-3 rounded-md border border-blue-200 min-h-[50px]">
+                                ${data['Response from the Admin'] || '<em class="text-gray-500">No response yet.</em>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            trackerResults.innerHTML = resultsHTML;
+            trackerResults.classList.remove('hidden');
+        }
+
+        function displayTrackerError(message) {
+            const errorHTML = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                    <p class="font-bold">Error</p>
+                    <p>${message}</p>
+                </div>
+            `;
+            trackerResults.innerHTML = errorHTML;
+            trackerResults.classList.remove('hidden');
+        }
+
+    </script>
+
+</body>
+</html>
